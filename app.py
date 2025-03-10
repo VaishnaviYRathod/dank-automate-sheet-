@@ -351,6 +351,9 @@ st.markdown(
 # Add checkbox for displaying debug information
 show_debug_info = st.checkbox("Show debug information", value=False)
 
+# Add option to include total row (off by default)
+include_total_row = st.checkbox("Include total row in output", value=False)
+
 uploaded_file = st.file_uploader("Upload Excel File", type=["xlsx"])
 
 if uploaded_file:
@@ -395,21 +398,23 @@ if uploaded_file:
             final_data = pd.concat(processed_sheets, ignore_index=True)
             
             if not final_data.empty:
-                # Compute total row
-                total_row = pd.Series(dtype='object')
-                for col in final_data.columns:
-                    if col == "Sales Date *":
-                        total_row[col] = "Total"
-                    elif col in ["Pos Item Name", "Order Id", "Sales Type Code"]:
-                        total_row[col] = ""
-                    else:
-                        # Try to sum numeric columns
-                        try:
-                            total_row[col] = pd.to_numeric(final_data[col], errors='coerce').sum()
-                        except:
+                # Only add total row if requested
+                if include_total_row:
+                    # Compute total row
+                    total_row = pd.Series(dtype='object')
+                    for col in final_data.columns:
+                        if col == "Sales Date *":
+                            total_row[col] = "Total"
+                        elif col in ["Pos Item Name", "Order Id", "Sales Type Code"]:
                             total_row[col] = ""
-                
-                final_data = pd.concat([final_data, pd.DataFrame([total_row])], ignore_index=True)
+                        else:
+                            # Try to sum numeric columns
+                            try:
+                                total_row[col] = pd.to_numeric(final_data[col], errors='coerce').sum()
+                            except:
+                                total_row[col] = ""
+                    
+                    final_data = pd.concat([final_data, pd.DataFrame([total_row])], ignore_index=True)
                 
                 # Display processing summary
                 st.success(f"File processed successfully! {successful_sheets} sheets processed, {failed_sheets} sheets skipped.")
