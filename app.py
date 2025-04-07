@@ -16,6 +16,13 @@ st.markdown(
         color: #4b0082;
         font-family: Arial, sans-serif;
     }
+    <style>
+/* Force all labels to have black text */
+label {
+    color: black !important;
+}
+</style>
+
     .stApp {
         background-color: #ffffff;
         padding: 20px;
